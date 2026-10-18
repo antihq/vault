@@ -6,6 +6,7 @@ use App\Services\ErrorTracker;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -24,6 +25,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Only ingress is Cloudflare Tunnel -> kamal-proxy (plain HTTP), so
+        // trustProxies can't see the https edge. Force generated URLs to
+        // https in production to prevent mixed content.
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
+
         $this->configureDefaults();
     }
 
